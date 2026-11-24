@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Irregular Verbs — Past Participle Crossword</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .cw-cell {
+      transition: background-color 0.14s ease, transform 0.1s ease, box-shadow 0.14s ease;
+    }
+    .cw-cell:active {
+      transform: scale(0.95);
+    }
+    .qwerty-key {
+      transition: transform 0.08s ease, background-color 0.12s ease, border-color 0.12s ease;
+    }
+    .qwerty-key:active {
+      transform: translateY(2px);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.75); opacity: 0.4; }
+      70% { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .letter-pop {
+      animation: popIn 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  </style>
+</head>
+<body class="h-[100dvh] w-full overflow-hidden bg-slate-100 text-slate-900 flex flex-col">
+
+  <!-- Top Navigation & Action Bar -->
+  <header class="shrink-0 bg-white border-b border-slate-200/90 px-3 sm:px-5 py-2 shadow-2xs z-10">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+      <!-- Title & Progress -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-mono font-extrabold text-sm shadow-xs shrink-0">
+          V3
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate leading-tight">
+            Past Participle Crossword
+          </h1>
+          <div class="flex items-center gap-2">
+            <div class="w-20 sm:w-28 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div id="progressBar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <span id="progressText" class="text-[11px] font-bold text-slate-500">0 / 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar Buttons -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button
+          id="checkBtn"
+          type="button"
+          class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition cursor-pointer flex items-center gap-1"
+          title="Check entered letters"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          <span>Check</span>
+        </button>
+
+        <button
+          id="hintLetterBtn"
+          type="button"
+          class="px-2.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold transition cursor-pointer"
+          title="Reveal selected letter"
+        >
+          Hint
+        </button>
+
+        <button
+          id="studyListBtn"
+          type="button"
+          class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer hidden sm:inline-flex items-center gap-1"
+          title="View all 41 irregular verbs"
+        >
+          <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+          <span>Verb Chart</span>
+        </button>
+
+        <button
+          id="newPuzzleBtn"
+          type="button"
+          class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition cursor-pointer flex items-center gap-1"
+          title="Generate a new crossword puzzle"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          <span>New</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Single-Viewport Interactive Board Workspace -->
+  <main class="flex-1 min-h-0 max-w-6xl w-full mx-auto px-2 sm:px-4 py-1 sm:py-1.5 flex flex-col justify-between gap-1 sm:gap-1.5">
+
+    <!-- Click-to-Reveal Clue Spotlight Banner -->
+    <section
+      id="clueSpotlightCard"
+      aria-live="polite"
+      class="shrink-0 bg-white rounded-xl border-2 border-slate-200/90 shadow-xs px-3 py-1 sm:py-1.5 transition-all"
+    >
+      <!-- Prompt State (Shown before any number/cell is clicked) -->
+      <div id="cluePromptState" class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 mx-auto text-center">
+          <span class="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 font-mono font-extrabold text-[11px] flex items-center justify-center shrink-0">
+            #
+          </span>
+          <p class="text-xs sm:text-sm font-bold text-slate-700">
+            Click any numbered square on the crossword to see its clue
+          </p>
+        </div>
+        <button
+          id="mobileStudyBtn"
+          type="button"
+          class="sm:hidden px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-bold shrink-0 cursor-pointer"
+        >
+          41 Verbs
+        </button>
+      </div>
+
+      <!-- Revealed Active Clue State (Shown only when a number/word is clicked) -->
+      <div id="clueRevealedState" class="hidden flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
+        <div class="flex items-center gap-2 min-w-0">
+          <!-- Clue Number & Direction Badge(s) -->
+          <div id="clueIntersectionTabs" class="flex items-center gap-1.5 shrink-0"></div>
+
+          <!-- Active Clue Text -->
+          <div class="min-w-0">
+            <p id="activeCluePrimary" class="text-xs sm:text-sm font-extrabold text-slate-900 leading-tight truncate"></p>
+            <p id="activeClueSentence" class="text-[11px] text-slate-600 leading-tight truncate"></p>
+          </div>
+        </div>
+
+        <!-- Sentence Hint Toggle & Close Clue -->
+        <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+          <button
+            id="toggleHintsBtn"
+            type="button"
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            title="Show or hide example sentence"
+          >
+            <span class="text-amber-500">💡</span>
+            <span id="toggleHintsText">Sentence: ON</span>
+          </button>
+          <button
+            id="hideClueBtn"
+            type="button"
+            class="px-2 py-0.5 rounded-lg text-[11px] font-bold border border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
+            title="Hide clue"
+          >
+            Hide
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Always-Visible Centered Crossword Grid Area (Maximized Stage) -->
+    <section id="gridStage" class="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+      <div
+        id="crosswordGrid"
+        class="grid bg-slate-900 p-1.5 rounded-2xl shadow-lg border-2 border-slate-800 shrink-0"
+        role="grid"
+        aria-label="Irregular Verbs Crossword Grid"
+      ></div>
+    </section>
+
+    <!-- Compact Clickable Interactive QWERTY Keyboard -->
+    <section
+      id="qwertyKeyboard"
+      aria-label="Interactive QWERTY Keyboard"
+      class="shrink-0 bg-slate-200/95 border border-slate-300/90 rounded-xl p-1 sm:p-1.5 shadow-sm select-none"
+    >
+      <div class="max-w-xl mx-auto flex flex-col gap-1">
+        <!-- Row 1: Q - P -->
+        <div class="grid grid-cols-10 gap-1">
+          <button type="button" data-key="Q" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">Q</button>
+          <button type="button" data-key="W" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">W</button>
+          <button type="button" data-key="E" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">E</button>
+          <button type="button" data-key="R" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">R</button>
+          <button type="button" data-key="T" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">T</button>
+          <button type="button" data-key="Y" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">Y</button>
+          <button type="button" data-key="U" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">U</button>
+          <button type="button" data-key="I" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">I</button>
+          <button type="button" data-key="O" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">O</button>
+          <button type="button" data-key="P" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">P</button>
+        </div>
+
+        <!-- Row 2: A - L -->
+        <div class="grid grid-cols-9 gap-1 px-3 sm:px-5">
+          <button type="button" data-key="A" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">A</button>
+          <button type="button" data-key="S" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">S</button>
+          <button type="button" data-key="D" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">D</button>
+          <button type="button" data-key="F" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">F</button>
+          <button type="button" data-key="G" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">G</button>
+          <button type="button" data-key="H" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">H</button>
+          <button type="button" data-key="J" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">J</button>
+          <button type="button" data-key="K" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">K</button>
+          <button type="button" data-key="L" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">L</button>
+        </div>
+
+        <!-- Row 3: SWITCH DIR + Z - M + BACKSPACE -->
+        <div class="grid grid-cols-10 gap-1">
+          <button
+            type="button"
+            data-action="SWITCH_DIR"
+            title="Switch Across / Down direction"
+            class="qwerty-key col-span-2 sm:col-span-1 h-7 sm:h-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-sans font-extrabold text-[10px] sm:text-[11px] shadow-2xs border-b-2 border-indigo-800 flex items-center justify-center gap-0.5 px-1 cursor-pointer"
+          >
+            <span>↔</span>
+            <span id="keyDirLabel">ACR</span>
+          </button>
+          <button type="button" data-key="Z" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">Z</button>
+          <button type="button" data-key="X" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">X</button>
+          <button type="button" data-key="C" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">C</button>
+          <button type="button" data-key="V" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">V</button>
+          <button type="button" data-key="B" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">B</button>
+          <button type="button" data-key="N" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">N</button>
+          <button type="button" data-key="M" class="qwerty-key h-7 sm:h-8 rounded-lg bg-white hover:bg-indigo-50 text-slate-900 font-mono font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-300 flex items-center justify-center cursor-pointer">M</button>
+          <button
+            type="button"
+            data-action="BACKSPACE"
+            aria-label="Backspace"
+            title="Backspace"
+            class="qwerty-key col-span-1 sm:col-span-2 h-7 sm:h-8 rounded-lg bg-slate-700 hover:bg-slate-800 text-white font-sans font-extrabold text-xs sm:text-sm shadow-2xs border-b-2 border-slate-900 flex items-center justify-center cursor-pointer"
+          >
+            ⌫
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification Pill (Replaces any browser alert) -->
+  <div
+    id="toastBanner"
+    class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-200 bg-slate-900 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full shadow-lg"
+  ></div>
+
+  <!-- Victory Celebration Modal -->
+  <div id="victoryModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-200">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mb-3">
+        🏆
+      </div>
+      <h2 class="text-xl font-extrabold text-slate-900 mb-1">Puzzle Solved!</h2>
+      <p class="text-sm text-slate-600 mb-5">
+        Awesome job! You mastered all the past participle forms in this crossword.
+      </p>
+      <div class="flex gap-2 justify-center">
+        <button
+          id="closeVictoryBtn"
+          type="button"
+          class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm cursor-pointer"
+        >
+          Review Board
+        </button>
+        <button
+          id="victoryNewBtn"
+          type="button"
+          class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm cursor-pointer"
+        >
+          Play Next Puzzle
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete 41-Verb Reference Chart Modal -->
+  <div id="studyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-5">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Irregular Verbs Reference (41 Verbs)</h2>
+          <p class="text-xs text-slate-500">Tap any row to hear pronunciation</p>
+        </div>
+        <button
+          id="closeStudyBtn"
+          type="button"
+          class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="px-5 py-2.5 bg-slate-50 border-b border-slate-200">
+        <input
+          id="verbSearchInput"
+          type="text"
+          placeholder="Search base form or past participle..."
+          class="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-sm focus:outline-none focus:border-indigo-500"
+        />
+      </div>
+      <div class="overflow-y-auto flex-1 p-3 sm:p-4">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-[11px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+              <th class="py-2 px-3">Base Form</th>
+              <th class="py-2 px-3">Past Simple</th>
+              <th class="py-2 px-3">Past Participle</th>
+              <th class="py-2 px-2 text-right">Audio</th>
+            </tr>
+          </thead>
+          <tbody id="verbTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Complete dataset of all 41 irregular verbs from the user's reference charts
+    const VERB_BANK = [
+      { id: 1, base: 'be', simple: 'was / were', participle: 'BEEN', displayParticiple: 'been', sentence: 'She has _____ to London twice.' },
+      { id: 2, base: 'become', simple: 'became', participle: 'BECOME', displayParticiple: 'become', sentence: 'He has _____ a famous doctor.' },
+      { id: 3, base: 'begin', simple: 'began', participle: 'BEGUN', displayParticiple: 'begun', sentence: 'The movie has already _____.' },
+      { id: 4, base: 'break', simple: 'broke', participle: 'BROKEN', displayParticiple: 'broken', sentence: 'Someone has _____ the kitchen window.' },
+      { id: 5, base: 'breed', simple: 'bred', participle: 'BRED', displayParticiple: 'bred', sentence: 'These horses are carefully _____.' },
+      { id: 6, base: 'bring', simple: 'brought', participle: 'BROUGHT', displayParticiple: 'brought', sentence: 'I have _____ snacks for everyone.' },
+      { id: 7, base: 'build', simple: 'built', participle: 'BUILT', displayParticiple: 'built', sentence: 'They have _____ a new bridge.' },
+      { id: 8, base: 'burn', simple: 'burnt / burned', participle: 'BURNT', displayParticiple: 'burnt / burned', note: 'Use -T form', sentence: 'Oh no, the toast has _____!' },
+      { id: 9, base: 'buy', simple: 'bought', participle: 'BOUGHT', displayParticiple: 'bought', sentence: 'We have _____ tickets for the show.' },
+      { id: 10, base: 'catch', simple: 'caught', participle: 'CAUGHT', displayParticiple: 'caught', sentence: 'The goalkeeper has _____ the ball.' },
+      { id: 11, base: 'choose', simple: 'chose', participle: 'CHOSEN', displayParticiple: 'chosen', sentence: 'She has _____ the blue dress.' },
+      { id: 12, base: 'come', simple: 'came', participle: 'COME', displayParticiple: 'come', sentence: 'Spring has finally _____.' },
+      { id: 13, base: 'cost', simple: 'cost', participle: 'COST', displayParticiple: 'cost', sentence: 'This mistake has _____ us a lot.' },
+      { id: 14, base: 'cut', simple: 'cut', participle: 'CUT', displayParticiple: 'cut', sentence: 'He has _____ his finger on paper.' },
+      { id: 15, base: 'dig', simple: 'dug', participle: 'DUG', displayParticiple: 'dug', sentence: 'The dog has _____ a hole in the yard.' },
+      { id: 16, base: 'do', simple: 'did', participle: 'DONE', displayParticiple: 'done', sentence: 'Have you _____ your homework yet?' },
+      { id: 17, base: 'draw', simple: 'drew', participle: 'DRAWN', displayParticiple: 'drawn', sentence: 'She has _____ a beautiful portrait.' },
+      { id: 18, base: 'drink', simple: 'drank', participle: 'DRUNK', displayParticiple: 'drunk', sentence: 'Who has _____ all the orange juice?' },
+      { id: 19, base: 'drive', simple: 'drove', participle: 'DRIVEN', displayParticiple: 'driven', sentence: 'Dad has _____ over 300 miles today.' },
+      { id: 20, base: 'eat', simple: 'ate', participle: 'EATEN', displayParticiple: 'eaten', sentence: 'Have you ever _____ sushi?' },
+      { id: 21, base: 'fall', simple: 'fell', participle: 'FALLEN', displayParticiple: 'fallen', sentence: 'Many leaves have _____ from the trees.' },
+      { id: 22, base: 'feel', simple: 'felt', participle: 'FELT', displayParticiple: 'felt', sentence: 'I have never _____ happier than today.' },
+      { id: 23, base: 'fight', simple: 'fought', participle: 'FOUGHT', displayParticiple: 'fought', sentence: 'The team has _____ hard to win.' },
+      { id: 24, base: 'find', simple: 'found', participle: 'FOUND', displayParticiple: 'found', sentence: 'I have _____ my missing keys!' },
+      { id: 25, base: 'fly', simple: 'flew', participle: 'FLOWN', displayParticiple: 'flown', sentence: 'The birds have _____ south for winter.' },
+      { id: 26, base: 'forget', simple: 'forgot', participle: 'FORGOTTEN', displayParticiple: 'forgotten', sentence: 'I have _____ my password again.' },
+      { id: 27, base: 'freeze', simple: 'froze', participle: 'FROZEN', displayParticiple: 'frozen', sentence: 'The lake has completely _____.' },
+      { id: 28, base: 'get', simple: 'got', participle: 'GOT', displayParticiple: 'got', sentence: 'She has _____ a brand-new bicycle.' },
+      { id: 29, base: 'give', simple: 'gave', participle: 'GIVEN', displayParticiple: 'given', sentence: 'They have _____ us great advice.' },
+      { id: 30, base: 'go', simple: 'went', participle: 'GONE', displayParticiple: 'gone', sentence: 'Where has everybody _____?' },
+      { id: 31, base: 'grow', simple: 'grew', participle: 'GROWN', displayParticiple: 'grown', sentence: 'You have _____ so tall this year!' },
+      { id: 32, base: 'hang', simple: 'hung', participle: 'HUNG', displayParticiple: 'hung', sentence: 'We have _____ the painting on the wall.' },
+      { id: 33, base: 'have', simple: 'had', participle: 'HAD', displayParticiple: 'had', sentence: 'We have _____ a wonderful time.' },
+      { id: 34, base: 'hear', simple: 'heard', participle: 'HEARD', displayParticiple: 'heard', sentence: 'Have you _____ the good news?' },
+      { id: 35, base: 'hide', simple: 'hid', participle: 'HIDDEN', displayParticiple: 'hidden', sentence: 'The cat has _____ under the bed.' },
+      { id: 36, base: 'hit', simple: 'hit', participle: 'HIT', displayParticiple: 'hit', sentence: 'The tennis ball has _____ the net.' },
+      { id: 37, base: 'hold', simple: 'held', participle: 'HELD', displayParticiple: 'held', sentence: 'She has _____ the record since 2022.' },
+      { id: 38, base: 'hurt', simple: 'hurt', participle: 'HURT', displayParticiple: 'hurt', sentence: 'He has _____ his knee playing soccer.' },
+      { id: 39, base: 'keep', simple: 'kept', participle: 'KEPT', displayParticiple: 'kept', sentence: 'She has _____ all her old letters.' },
+      { id: 40, base: 'know', simple: 'knew', participle: 'KNOWN', displayParticiple: 'known', sentence: 'I have _____ him since kindergarten.' },
+      { id: 41, base: 'learn', simple: 'learnt / learned', participle: 'LEARNT', displayParticiple: 'learnt / learned', note: 'Use -T form', sentence: 'We have _____ many irregular verbs!' }
+    ];
+
+    const state = {
+      rows: 0,
+      cols: 0,
+      grid: [],
+      placedWords: [],
+      userGrid: [],
+      cellStatus: [], // null | 'correct' | 'wrong' | 'revealed'
+      activeCell: null,
+      direction: 'ACROSS',
+      clueRevealed: false,
+      showSentences: true,
+      victoryShown: false
+    };
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('toastBanner');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('opacity-0', '-translate-y-1');
+      el.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.remove('opacity-100', 'translate-y-0');
+        el.classList.add('opacity-0', '-translate-y-1');
+      }, 2100);
+    }
+
+    /**
+     * Procedural Crossword Layout Generator
+     * Creates a compact, verified, collision-free crossword puzzle using 10–11 irregular verbs
+     * so every cell stays large, crisp, and 100% readable on interactive boards.
+     */
+    function generateCrosswordPuzzle() {
+      const GRID_DIM = 13;
+      const TARGET_WORDS = 11;
+      let bestLayout = null;
+
+      for (let attempt = 0; attempt < 45; attempt++) {
+        const board = Array.from({ length: GRID_DIM }, () => Array(GRID_DIM).fill(null));
+        const placed = [];
+
+        const candidates = shuffle(VERB_BANK);
+        candidates.sort((a, b) => {
+          const scoreA = (a.participle.length >= 4 && a.participle.length <= 7 ? 2 : 0) + Math.random() * 2;
+          const scoreB = (b.participle.length >= 4 && b.participle.length <= 7 ? 2 : 0) + Math.random() * 2;
+          return scoreB - scoreA;
+        });
+
+        const first = candidates[0];
+        const startRow = Math.floor(GRID_DIM / 2);
+        const startCol = Math.max(1, Math.floor((GRID_DIM - first.participle.length) / 2));
+
+        placeWordOnBoard(board, placed, first, startRow, startCol, 'ACROSS');
+
+        let added = true;
+        while (added && placed.length < TARGET_WORDS) {
+          added = false;
+          for (const verb of candidates) {
+            if (placed.some(p => p.verb.id === verb.id)) continue;
+
+            const word = verb.participle;
+            const validSpots = [];
+
+            for (let i = 0; i < word.length; i++) {
+              const ch = word[i];
+              for (let r = 0; r < GRID_DIM; r++) {
+                for (let c = 0; c < GRID_DIM; c++) {
+                  if (board[r][c] === ch) {
+                    const rA = r;
+                    const cA = c - i;
+                    if (canPlaceWord(board, placed, word, rA, cA, 'ACROSS', GRID_DIM)) {
+                      const span = getBoundingSpan(board, word, rA, cA, 'ACROSS');
+                      validSpots.push({
+                        r: rA,
+                        c: cA,
+                        dir: 'ACROSS',
+                        intersections: countIntersections(board, word, rA, cA, 'ACROSS'),
+                        span
+                      });
+                    }
+                    const rD = r - i;
+                    const cD = c;
+                    if (canPlaceWord(board, placed, word, rD, cD, 'DOWN', GRID_DIM)) {
+                      const span = getBoundingSpan(board, word, rD, cD, 'DOWN');
+                      validSpots.push({
+                        r: rD,
+                        c: cD,
+                        dir: 'DOWN',
+                        intersections: countIntersections(board, word, rD, cD, 'DOWN'),
+                        span
+                      });
+                    }
+                  }
+                }
+              }
+            }
+
+            if (validSpots.length > 0) {
+              validSpots.sort((a, b) => (b.intersections * 3 - b.span) - (a.intersections * 3 - a.span) + (Math.random() - 0.5));
+              const chosen = validSpots[0];
+              placeWordOnBoard(board, placed, verb, chosen.r, chosen.c, chosen.dir);
+              added = true;
+              break;
+            }
+          }
+        }
+
+        if (!bestLayout || placed.length > bestLayout.placed.length) {
+          bestLayout = { board, placed };
+        }
+        if (bestLayout.placed.length >= TARGET_WORDS) break;
+      }
+
+      // Trim unused outer rows and columns tightly
+      let minR = GRID_DIM, maxR = 0, minC = GRID_DIM, maxC = 0;
+      for (let r = 0; r < GRID_DIM; r++) {
+        for (let c = 0; c < GRID_DIM; c++) {
+          if (bestLayout.board[r][c] !== null) {
+            if (r < minR) minR = r;
+            if (r > maxR) maxR = r;
+            if (c < minC) minC = c;
+            if (c > maxC) maxC = c;
+          }
+        }
+      }
+
+      const rows = maxR - minR + 1;
+      const cols = maxC - minC + 1;
+      const trimmedGrid = Array.from({ length: rows }, () => Array(cols).fill(null));
+
+      for (let r = minR; r <= maxR; r++) {
+        for (let c = minC; c <= maxC; c++) {
+          if (bestLayout.board[r][c] !== null) {
+            trimmedGrid[r - minR][c - minC] = {
+              letter: bestLayout.board[r][c],
+              number: null,
+              acrossWord: null,
+              downWord: null
+            };
+          }
+        }
+      }
+
+      const adjustedPlaced = bestLayout.placed.map(item => ({
+        ...item,
+        r: item.r - minR,
+        c: item.c - minC
+      }));
+
+      // Assign standard crossword numbering (top-to-bottom, left-to-right)
+      let clueNum = 1;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (!trimmedGrid[r][c]) continue;
+          const startsAcross = adjustedPlaced.find(w => w.dir === 'ACROSS' && w.r === r && w.c === c);
+          const startsDown = adjustedPlaced.find(w => w.dir === 'DOWN' && w.r === r && w.c === c);
+
+          if (startsAcross || startsDown) {
+            trimmedGrid[r][c].number = clueNum;
+            if (startsAcross) startsAcross.number = clueNum;
+            if (startsDown) startsDown.number = clueNum;
+            clueNum++;
+          }
+        }
+      }
+
+      // Link every cell to its Across and/or Down word
+      adjustedPlaced.forEach(w => {
+        for (let i = 0; i < w.word.length; i++) {
+          const cr = w.dir === 'ACROSS' ? w.r : w.r + i;
+          const cc = w.dir === 'ACROSS' ? w.c + i : w.c;
+          if (w.dir === 'ACROSS') {
+            trimmedGrid[cr][cc].acrossWord = w;
+          } else {
+            trimmedGrid[cr][cc].downWord = w;
+          }
+        }
+      });
+
+      return {
+        rows,
+        cols,
+        grid: trimmedGrid,
+        placed: adjustedPlaced.sort((a, b) => a.number - b.number)
+      };
+    }
+
+    function getBoundingSpan(board, word, r, c, dir) {
+      let minR = r, maxR = dir === 'DOWN' ? r + word.length - 1 : r;
+      let minC = c, maxC = dir === 'ACROSS' ? c + word.length - 1 : c;
+      for (let rr = 0; rr < board.length; rr++) {
+        for (let cc = 0; cc < board[0].length; cc++) {
+          if (board[rr][cc] !== null) {
+            if (rr < minR) minR = rr;
+            if (rr > maxR) maxR = rr;
+            if (cc < minC) minC = cc;
+            if (cc > maxC) maxC = cc;
+          }
+        }
+      }
+      return Math.max(maxR - minR + 1, maxC - minC + 1);
+    }
+
+    function placeWordOnBoard(board, placed, verb, r, c, dir) {
+      const word = verb.participle;
+      for (let i = 0; i < word.length; i++) {
+        const cr = dir === 'ACROSS' ? r : r + i;
+        const cc = dir === 'ACROSS' ? c + i : c;
+        board[cr][cc] = word[i];
+      }
+      placed.push({ verb, word, r, c, dir, number: 0 });
+    }
+
+    function countIntersections(board, word, r, c, dir) {
+      let count = 0;
+      for (let i = 0; i < word.length; i++) {
+        const cr = dir === 'ACROSS' ? r : r + i;
+        const cc = dir === 'ACROSS' ? c + i : c;
+        if (board[cr][cc] === word[i]) count++;
+      }
+      return count;
+    }
+
+    function canPlaceWord(board, placed, word, r, c, dir, dim) {
+      if (r < 0 || c < 0) return false;
+      if (dir === 'ACROSS' && c + word.length > dim) return false;
+      if (dir === 'DOWN' && r + word.length > dim) return false;
+
+      if (dir === 'ACROSS') {
+        if (c - 1 >= 0 && board[r][c - 1] !== null) return false;
+        if (c + word.length < dim && board[r][c + word.length] !== null) return false;
+      } else {
+        if (r - 1 >= 0 && board[r - 1][c] !== null) return false;
+        if (r + word.length < dim && board[r + word.length][c] !== null) return false;
+      }
+
+      let hasIntersection = false;
+
+      for (let i = 0; i < word.length; i++) {
+        const cr = dir === 'ACROSS' ? r : r + i;
+        const cc = dir === 'ACROSS' ? c + i : c;
+        const existing = board[cr][cc];
+
+        if (existing !== null) {
+          if (existing !== word[i]) return false;
+
+          const sameDirConflict = placed.some(pw => {
+            if (pw.dir !== dir) return false;
+            for (let k = 0; k < pw.word.length; k++) {
+              const pr = pw.dir === 'ACROSS' ? pw.r : pw.r + k;
+              const pc = pw.dir === 'ACROSS' ? pw.c + k : pw.c;
+              if (pr === cr && pc === cc) return true;
+            }
+            return false;
+          });
+          if (sameDirConflict) return false;
+
+          hasIntersection = true;
+        } else {
+          if (dir === 'ACROSS') {
+            if (cr - 1 >= 0 && board[cr - 1][cc] !== null) return false;
+            if (cr + 1 < dim && board[cr + 1][cc] !== null) return false;
+          } else {
+            if (cc - 1 >= 0 && board[cr][cc - 1] !== null) return false;
+            if (cc + 1 < dim && board[cr][cc + 1] !== null) return false;
+          }
+        }
+      }
+
+      return hasIntersection;
+    }
+
+    /**
+     * Initialize or Reset a New Puzzle Round
+     */
+    function initNewPuzzle() {
+      const puzzle = generateCrosswordPuzzle();
+      state.rows = puzzle.rows;
+      state.cols = puzzle.cols;
+      state.grid = puzzle.grid;
+      state.placedWords = puzzle.placed;
+      state.userGrid = Array.from({ length: puzzle.rows }, () => Array(puzzle.cols).fill(''));
+      state.cellStatus = Array.from({ length: puzzle.rows }, () => Array(puzzle.cols).fill(null));
+      state.activeCell = null;
+      state.direction = 'ACROSS';
+      state.clueRevealed = false;
+      state.victoryShown = false;
+
+      renderGrid();
+      updateUIHighlights();
+      updateProgress();
+
+      requestAnimationFrame(() => {
+        renderGrid();
+        updateUIHighlights();
+      });
+    }
+
+    /**
+     * Render Crossword Grid Cells dynamically sized to fill the available viewport area
+     */
+    function renderGrid() {
+      const gridEl = document.getElementById('crosswordGrid');
+      const stageEl = document.getElementById('gridStage');
+      if (!gridEl || !stageEl || state.rows === 0 || state.cols === 0) return;
+
+      gridEl.innerHTML = '';
+
+      const headerH = document.querySelector('header')?.offsetHeight || 48;
+      const clueH = document.getElementById('clueSpotlightCard')?.offsetHeight || 40;
+      const kbH = document.getElementById('qwertyKeyboard')?.offsetHeight || 108;
+      const stageRect = stageEl.getBoundingClientRect();
+
+      const availW = Math.max(260, (stageRect.width > 40 ? stageRect.width : window.innerWidth - 16) - 16);
+      const computedAvailH = window.innerHeight - headerH - clueH - kbH - 22;
+      const availH = Math.max(240, Math.max(stageRect.height - 8, computedAvailH));
+
+      const cellByW = Math.floor((availW - (state.cols - 1) * 3 - 16) / state.cols);
+      const cellByH = Math.floor((availH - (state.rows - 1) * 3 - 16) / state.rows);
+      const cellPx = Math.max(26, Math.min(76, cellByW, cellByH));
+
+      gridEl.style.gridTemplateColumns = `repeat(${state.cols}, ${cellPx}px)`;
+      gridEl.style.gap = '3px';
+
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          const cellData = state.grid[r][c];
+          const cellDiv = document.createElement('div');
+          cellDiv.style.width = `${cellPx}px`;
+          cellDiv.style.height = `${cellPx}px`;
+          cellDiv.dataset.r = r;
+          cellDiv.dataset.c = c;
+
+          if (!cellData) {
+            cellDiv.className = 'bg-slate-800/90 rounded-[6px]';
+          } else {
+            cellDiv.className =
+              'cw-cell relative bg-white rounded-[6px] flex items-center justify-center cursor-pointer font-mono font-extrabold text-slate-900 shadow-xs';
+            cellDiv.style.fontSize = `${Math.max(15, Math.floor(cellPx * 0.56))}px`;
+
+            if (cellData.number !== null) {
+              const numSpan = document.createElement('span');
+              numSpan.textContent = cellData.number;
+              numSpan.className =
+                'cell-number absolute top-[2px] left-[4px] font-sans font-extrabold leading-none text-indigo-700 pointer-events-none';
+              numSpan.style.fontSize = `${Math.max(10, Math.floor(cellPx * 0.27))}px`;
+              cellDiv.appendChild(numSpan);
+            }
+
+            const letterSpan = document.createElement('span');
+            letterSpan.className = 'cell-letter uppercase tracking-tight pointer-events-none mt-1';
+            letterSpan.textContent = state.userGrid[r][c] || '';
+            cellDiv.appendChild(letterSpan);
+
+            cellDiv.addEventListener('click', () => handleCellClick(r, c));
+          }
+
+          gridEl.appendChild(cellDiv);
+        }
+      }
+    }
+
+    function getActiveWordObj() {
+      if (!state.activeCell) return null;
+      const { r, c } = state.activeCell;
+      const cell = state.grid[r]?.[c];
+      if (!cell) return null;
+
+      if (state.direction === 'ACROSS' && cell.acrossWord) return cell.acrossWord;
+      if (state.direction === 'DOWN' && cell.downWord) return cell.downWord;
+      return cell.acrossWord || cell.downWord || null;
+    }
+
+    /**
+     * Handle clicking a cell on the crossword:
+     * - Reveals the clue ONLY when clicked
+     * - Toggles ACROSS/DOWN if tapping an already-selected intersection cell
+     */
+    function handleCellClick(r, c) {
+      const cell = state.grid[r]?.[c];
+      if (!cell) return;
+
+      const isSameCell = state.activeCell && state.activeCell.r === r && state.activeCell.c === c;
+      state.activeCell = { r, c };
+      state.clueRevealed = true;
+
+      if (isSameCell && cell.acrossWord && cell.downWord) {
+        state.direction = state.direction === 'ACROSS' ? 'DOWN' : 'ACROSS';
+      } else {
+        // If the square starts a numbered word in one direction, prefer that direction naturally
+        const startsAcross = cell.acrossWord && cell.acrossWord.r === r && cell.acrossWord.c === c;
+        const startsDown = cell.downWord && cell.downWord.r === r && cell.downWord.c === c;
+
+        if (startsAcross && !startsDown) {
+          state.direction = 'ACROSS';
+        } else if (startsDown && !startsAcross) {
+          state.direction = 'DOWN';
+        } else if (state.direction === 'ACROSS' && !cell.acrossWord && cell.downWord) {
+          state.direction = 'DOWN';
+        } else if (state.direction === 'DOWN' && !cell.downWord && cell.acrossWord) {
+          state.direction = 'ACROSS';
+        }
+      }
+
+      updateUIHighlights();
+    }
+
+    function toggleDirection() {
+      if (!state.activeCell) {
+        // Select first numbered cell if none selected yet
+        const firstWord = state.placedWords[0];
+        if (firstWord) {
+          state.activeCell = { r: firstWord.r, c: firstWord.c };
+          state.direction = firstWord.dir;
+          state.clueRevealed = true;
+          updateUIHighlights();
+        }
+        return;
+      }
+
+      const { r, c } = state.activeCell;
+      const cell = state.grid[r]?.[c];
+      if (!cell) return;
+
+      if (state.direction === 'ACROSS' && cell.downWord) {
+        state.direction = 'DOWN';
+      } else if (state.direction === 'DOWN' && cell.acrossWord) {
+        state.direction = 'ACROSS';
+      } else {
+        showToast('Only one direction at this square');
+      }
+      state.clueRevealed = true;
+      updateUIHighlights();
+    }
+
+    /**
+     * Update cell colors, active word highlight, keyboard direction label, and Clue Spotlight
+     */
+    function updateUIHighlights() {
+      const activeWord = getActiveWordObj();
+      if (activeWord) {
+        state.direction = activeWord.dir;
+      }
+
+      const keyDirLabel = document.getElementById('keyDirLabel');
+      if (keyDirLabel) {
+        keyDirLabel.textContent = state.direction === 'ACROSS' ? 'ACR' : 'DWN';
+      }
+
+      // Update grid cell visuals
+      const cellDivs = document.querySelectorAll('#crosswordGrid [data-r]');
+      cellDivs.forEach(div => {
+        const r = Number(div.dataset.r);
+        const c = Number(div.dataset.c);
+        const cellData = state.grid[r][c];
+        if (!cellData) return;
+
+        const isSelected = state.activeCell && state.activeCell.r === r && state.activeCell.c === c;
+        const isInWord =
+          activeWord &&
+          ((activeWord.dir === 'ACROSS' && r === activeWord.r && c >= activeWord.c && c < activeWord.c + activeWord.word.length) ||
+            (activeWord.dir === 'DOWN' && c === activeWord.c && r >= activeWord.r && r < activeWord.r + activeWord.word.length));
+
+        const status = state.cellStatus[r][c];
+        const letterSpan = div.querySelector('.cell-letter');
+        const numSpan = div.querySelector('.cell-number');
+
+        if (letterSpan) {
+          letterSpan.textContent = state.userGrid[r][c] || '';
+        }
+
+        // Base reset
+        div.classList.remove(
+          'bg-white', 'bg-indigo-600', 'bg-indigo-100', 'bg-emerald-100', 'bg-rose-100', 'bg-amber-100',
+          'text-slate-900', 'text-white', 'text-emerald-900', 'text-rose-900', 'text-amber-900',
+          'ring-2', 'ring-indigo-400', 'z-10'
+        );
+        if (numSpan) {
+          numSpan.classList.remove('text-indigo-700', 'text-indigo-200');
+        }
+
+        if (isSelected) {
+          div.classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-300', 'z-10');
+          if (numSpan) numSpan.classList.add('text-indigo-200');
+        } else if (status === 'correct') {
+          div.classList.add('bg-emerald-100', 'text-emerald-900');
+          if (numSpan) numSpan.classList.add('text-indigo-700');
+        } else if (status === 'wrong') {
+          div.classList.add('bg-rose-100', 'text-rose-900');
+          if (numSpan) numSpan.classList.add('text-indigo-700');
+        } else if (status === 'revealed') {
+          div.classList.add('bg-amber-100', 'text-amber-900');
+          if (numSpan) numSpan.classList.add('text-indigo-700');
+        } else if (isInWord) {
+          div.classList.add('bg-indigo-100', 'text-slate-900');
+          if (numSpan) numSpan.classList.add('text-indigo-700');
+        } else {
+          div.classList.add('bg-white', 'text-slate-900');
+          if (numSpan) numSpan.classList.add('text-indigo-700');
+        }
+      });
+
+      // Update Click-to-Reveal Clue Spotlight Banner
+      const promptEl = document.getElementById('cluePromptState');
+      const revealedEl = document.getElementById('clueRevealedState');
+      const cardEl = document.getElementById('clueSpotlightCard');
+
+      if (!state.clueRevealed || !activeWord || !state.activeCell) {
+        promptEl.classList.remove('hidden');
+        promptEl.classList.add('flex');
+        revealedEl.classList.add('hidden');
+        revealedEl.classList.remove('flex');
+        cardEl.classList.remove('border-indigo-400', 'bg-indigo-50/30');
+        cardEl.classList.add('border-slate-200/90', 'bg-white');
+        return;
+      }
+
+      promptEl.classList.add('hidden');
+      promptEl.classList.remove('flex');
+      revealedEl.classList.remove('hidden');
+      revealedEl.classList.add('flex');
+      cardEl.classList.add('border-indigo-400', 'bg-indigo-50/30');
+      cardEl.classList.remove('border-slate-200/90', 'bg-white');
+
+      const { r, c } = state.activeCell;
+      const cell = state.grid[r][c];
+      const tabsContainer = document.getElementById('clueIntersectionTabs');
+      tabsContainer.innerHTML = '';
+
+      // Primary badge for active clue
+      const primaryBadge = document.createElement('span');
+      primaryBadge.className =
+        'px-2.5 py-1 rounded-xl bg-indigo-600 text-white font-mono font-extrabold text-xs sm:text-sm shadow-2xs';
+      primaryBadge.textContent = `${activeWord.number} ${activeWord.dir}`;
+      tabsContainer.appendChild(primaryBadge);
+
+      // If cell is at an intersection, offer a quick one-tap pill to switch to the crossing clue
+      if (cell.acrossWord && cell.downWord) {
+        const otherWord = activeWord.dir === 'ACROSS' ? cell.downWord : cell.acrossWord;
+        const switchPill = document.createElement('button');
+        switchPill.type = 'button';
+        switchPill.className =
+          'px-2 py-1 rounded-xl bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-800 font-mono font-bold text-[11px] border border-slate-200 transition cursor-pointer';
+        switchPill.textContent = `⇄ ${otherWord.number} ${otherWord.dir}`;
+        switchPill.title = 'Switch to intersecting clue';
+        switchPill.addEventListener('click', () => {
+          state.direction = otherWord.dir;
+          updateUIHighlights();
+        });
+        tabsContainer.appendChild(switchPill);
+      }
+
+      const primaryText = document.getElementById('activeCluePrimary');
+      const noteHtml = activeWord.verb.note
+        ? ` <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-md">${activeWord.verb.note}</span>`
+        : '';
+      primaryText.innerHTML = `Base verb: <span class="text-indigo-600 underline decoration-indigo-300 underline-offset-2">${activeWord.verb.base}</span> <span class="text-xs font-semibold text-slate-500">(${activeWord.word.length} letters)</span>${noteHtml}`;
+
+      const sentenceEl = document.getElementById('activeClueSentence');
+      if (state.showSentences) {
+        sentenceEl.textContent = `"${activeWord.verb.sentence}"`;
+        sentenceEl.classList.remove('hidden');
+      } else {
+        sentenceEl.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Letter Input & Cursor Advancement
+     */
+    function inputLetter(rawChar) {
+      const letter = rawChar.toUpperCase();
+      if (!/^[A-Z]$/.test(letter)) return;
+
+      if (!state.activeCell) {
+        const first = state.placedWords[0];
+        if (!first) return;
+        state.activeCell = { r: first.r, c: first.c };
+        state.direction = first.dir;
+        state.clueRevealed = true;
+      }
+
+      const { r, c } = state.activeCell;
+      if (!state.grid[r]?.[c]) return;
+
+      state.userGrid[r][c] = letter;
+      if (state.cellStatus[r][c] !== 'revealed') {
+        state.cellStatus[r][c] = null;
+      }
+
+      // Animate letter pop
+      const cellDiv = document.querySelector(`#crosswordGrid [data-r="${r}"][data-c="${c}"] .cell-letter`);
+      if (cellDiv) {
+        cellDiv.classList.remove('letter-pop');
+        void cellDiv.offsetWidth;
+        cellDiv.classList.add('letter-pop');
+      }
+
+      advanceCursor(1);
+      updateUIHighlights();
+      updateProgress();
+      checkAutoVictory();
+    }
+
+    function handleBackspace() {
+      if (!state.activeCell) return;
+      const { r, c } = state.activeCell;
+      if (!state.grid[r]?.[c]) return;
+
+      if (state.userGrid[r][c] !== '') {
+        state.userGrid[r][c] = '';
+        if (state.cellStatus[r][c] !== 'revealed') {
+          state.cellStatus[r][c] = null;
+        }
+      } else {
+        advanceCursor(-1);
+        const prev = state.activeCell;
+        if (prev && state.grid[prev.r]?.[prev.c]) {
+          state.userGrid[prev.r][prev.c] = '';
+          if (state.cellStatus[prev.r][prev.c] !== 'revealed') {
+            state.cellStatus[prev.r][prev.c] = null;
+          }
+        }
+      }
+
+      updateUIHighlights();
+      updateProgress();
+    }
+
+    function advanceCursor(step) {
+      const activeWord = getActiveWordObj();
+      if (!activeWord || !state.activeCell) return;
+
+      const { r, c } = state.activeCell;
+      const idx = activeWord.dir === 'ACROSS' ? c - activeWord.c : r - activeWord.r;
+      const nextIdx = idx + step;
+
+      if (nextIdx >= 0 && nextIdx < activeWord.word.length) {
+        state.activeCell = {
+          r: activeWord.dir === 'ACROSS' ? activeWord.r : activeWord.r + nextIdx,
+          c: activeWord.dir === 'ACROSS' ? activeWord.c + nextIdx : activeWord.c
+        };
+      }
+    }
+
+    function moveArrow(dr, dc) {
+      if (!state.activeCell) return;
+      let nr = state.activeCell.r + dr;
+      let nc = state.activeCell.c + dc;
+      while (nr >= 0 && nr < state.rows && nc >= 0 && nc < state.cols) {
+        if (state.grid[nr][nc]) {
+          state.activeCell = { r: nr, c: nc };
+          state.clueRevealed = true;
+          updateUIHighlights();
+          return;
+        }
+        nr += dr;
+        nc += dc;
+      }
+    }
+
+    /**
+     * Check Answers, Hint Letter, Progress & Victory
+     */
+    function checkAnswers() {
+      let filledCount = 0;
+      let wrongCount = 0;
+
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          const cell = state.grid[r][c];
+          if (!cell) continue;
+          const val = state.userGrid[r][c];
+          if (val) {
+            filledCount++;
+            if (val === cell.letter) {
+              if (state.cellStatus[r][c] !== 'revealed') {
+                state.cellStatus[r][c] = 'correct';
+              }
+            } else {
+              state.cellStatus[r][c] = 'wrong';
+              wrongCount++;
+            }
+          }
+        }
+      }
+
+      updateUIHighlights();
+
+      if (filledCount === 0) {
+        showToast('Tap a numbered square and type letters first!');
+      } else if (wrongCount === 0) {
+        showToast('All entered letters are right so far!');
+        checkAutoVictory();
+      } else {
+        showToast(`${wrongCount} letter${wrongCount === 1 ? '' : 's'} highlighted in red`);
+      }
+    }
+
+    function revealSelectedLetter() {
+      if (!state.activeCell) {
+        showToast('Select a square on the grid first');
+        return;
+      }
+      const { r, c } = state.activeCell;
+      const cell = state.grid[r]?.[c];
+      if (!cell) return;
+
+      state.userGrid[r][c] = cell.letter;
+      state.cellStatus[r][c] = 'revealed';
+      advanceCursor(1);
+      updateUIHighlights();
+      updateProgress();
+      checkAutoVictory();
+    }
+
+    function updateProgress() {
+      let total = 0;
+      let filled = 0;
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          if (state.grid[r][c]) {
+            total++;
+            if (state.userGrid[r][c]) filled++;
+          }
+        }
+      }
+      const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
+      const bar = document.getElementById('progressBar');
+      const txt = document.getElementById('progressText');
+      if (bar) bar.style.width = `${pct}%`;
+      if (txt) txt.textContent = `${filled} / ${total}`;
+    }
+
+    function checkAutoVictory() {
+      if (state.victoryShown) return;
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          const cell = state.grid[r][c];
+          if (cell && state.userGrid[r][c] !== cell.letter) {
+            return;
+          }
+        }
+      }
+
+      // Mark all cells green on complete solve
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          if (state.grid[r][c] && state.cellStatus[r][c] !== 'revealed') {
+            state.cellStatus[r][c] = 'correct';
+          }
+        }
+      }
+      state.victoryShown = true;
+      updateUIHighlights();
+
+      const modal = document.getElementById('victoryModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    /**
+     * 41-Verb Study Reference Table & Speech Synthesis
+     */
+    function speakVerb(verb) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(`${verb.base}, ${verb.simple.replace('/', ' or ')}, ${verb.displayParticiple.replace('/', ' or ')}`);
+      utter.lang = 'en-US';
+      utter.rate = 0.92;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function renderVerbTable(filter = '') {
+      const tbody = document.getElementById('verbTableBody');
+      if (!tbody) return;
+      const q = filter.trim().toLowerCase();
+      tbody.innerHTML = '';
+
+      VERB_BANK.filter(v => !q || v.base.includes(q) || v.displayParticiple.includes(q) || v.simple.includes(q)).forEach(v => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-indigo-50/70 transition cursor-pointer';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-slate-900">${v.base}</td>
+          <td class="py-2.5 px-3 text-slate-600">${v.simple}</td>
+          <td class="py-2.5 px-3 font-extrabold text-indigo-700">${v.displayParticiple}</td>
+          <td class="py-2.5 px-2 text-right">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs">🔊</span>
+          </td>
+        `;
+        tr.addEventListener('click', () => speakVerb(v));
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Bind On-Screen QWERTY Keyboard Clicks
+    document.getElementById('qwertyKeyboard')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const key = btn.dataset.key;
+      const action = btn.dataset.action;
+      if (key) {
+        inputLetter(key);
+      } else if (action === 'BACKSPACE') {
+        handleBackspace();
+      } else if (action === 'SWITCH_DIR') {
+        toggleDirection();
+      }
+    });
+
+    // Bind Physical Keyboard Events
+    document.addEventListener('keydown', e => {
+      const studyModal = document.getElementById('studyModal');
+      if (studyModal && !studyModal.classList.contains('hidden')) return;
+
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      if (/^[a-zA-Z]$/.test(e.key)) {
+        e.preventDefault();
+        inputLetter(e.key);
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        handleBackspace();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        toggleDirection();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        moveArrow(0, 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        moveArrow(0, -1);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveArrow(1, 0);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveArrow(-1, 0);
+      }
+    });
+
+    // Toolbar & Modal Event Listeners
+    document.getElementById('newPuzzleBtn')?.addEventListener('click', () => {
+      initNewPuzzle();
+      showToast('New crossword generated!');
+    });
+    document.getElementById('checkBtn')?.addEventListener('click', checkAnswers);
+    document.getElementById('hintLetterBtn')?.addEventListener('click', revealSelectedLetter);
+
+    document.getElementById('toggleHintsBtn')?.addEventListener('click', () => {
+      state.showSentences = !state.showSentences;
+      const txt = document.getElementById('toggleHintsText');
+      if (txt) txt.textContent = state.showSentences ? 'Sentence: ON' : 'Sentence: OFF';
+      updateUIHighlights();
+    });
+
+    document.getElementById('hideClueBtn')?.addEventListener('click', () => {
+      state.clueRevealed = false;
+      updateUIHighlights();
+    });
+
+    // Victory Modal Controls
+    document.getElementById('closeVictoryBtn')?.addEventListener('click', () => {
+      const modal = document.getElementById('victoryModal');
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+    });
+    document.getElementById('victoryNewBtn')?.addEventListener('click', () => {
+      const modal = document.getElementById('victoryModal');
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+      initNewPuzzle();
+    });
+
+    // Study Modal Controls
+    function openStudyModal() {
+      renderVerbTable();
+      const modal = document.getElementById('studyModal');
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    }
+    document.getElementById('studyListBtn')?.addEventListener('click', openStudyModal);
+    document.getElementById('mobileStudyBtn')?.addEventListener('click', openStudyModal);
+    document.getElementById('closeStudyBtn')?.addEventListener('click', () => {
+      const modal = document.getElementById('studyModal');
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+    });
+    document.getElementById('verbSearchInput')?.addEventListener('input', e => {
+      renderVerbTable(e.target.value);
+    });
+
+    // Responsive Resize Handler
+    let resizeTimeout = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (state.grid.length > 0) {
+          renderGrid();
+          updateUIHighlights();
+        }
+      }, 80);
+    });
+
+    // Start Application Immediately & on Load
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initNewPuzzle);
+    } else {
+      initNewPuzzle();
+    }
+    window.addEventListener('load', () => {
+      if (state.grid.length > 0) {
+        renderGrid();
+        updateUIHighlights();
+      }
+    });
+  </script>
+</body>
+</html>
